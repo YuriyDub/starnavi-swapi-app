@@ -78,6 +78,55 @@ Where to look next
 - `src/entities/*/ui/*` — node components (HeroNode, FilmNode, StarshipNode) using `BaseNode`.
 - `src/shared/ui/BaseNode.tsx` — shared card wrapper used by nodes.
 
+Hooks
+
+- `useHeroDetails(id?: string)` — `src/features/hero-details/lib/useHeroDetails.ts`
+
+  - Purpose: orchestrates fetching a `Person` and related `Film` and `Starship` entities,
+    then builds React Flow `nodes` and `edges` for the graph view.
+  - Returns: `{ nodes: Node[], edges: Edge[], loading: boolean, error: Error | null, person: Person | null }`.
+  - Notes: The module also exports a pure helper `buildGraphFromData(person, films, starships)`
+    which constructs the `nodes`/`edges` from already-fetched data — use this helper in
+    unit tests to avoid network calls.
+
+- `usePersonQuery(id: string)` — `src/entities/person/lib/usePersonQuery.tsx`
+
+  - Purpose: thin hook wrapper around the shared `useQuery` to fetch a `Person` by id.
+  - Returns: `{ data: Person | null, loading: boolean, error: Error | null }`.
+  - Testing: Mock `useQuery` or `getPersonById` when testing components/hooks that use this.
+
+- `useQuery<T>(fetcher)` — `src/shared/lib/useQuery.tsx`
+
+  - Purpose: small generic hook for data fetching with `AbortController` support.
+  - Returns: `{ data: T | null, loading: boolean, error: Error | null }`.
+  - Testing: Keep network calls isolated; for unit tests, stub the `fetcher` function.
+
+- `useCardEffect()` — `src/shared/hooks/useCardEffect.tsx` (or `src/shared/lib`)
+
+  - Purpose: exposes pointer event handlers to create the card tilt/shine effect used
+    by `BaseNode` and other card-like components.
+  - Returns: `{ onMouseEnter, onMouseMove, onMouseLeave }` handlers to spread on the card root.
+  - Testing: Render components with the handlers and fire events using `@testing-library/react`.
+
+- `useIntersectionObserver` and other small hooks — `src/shared/hooks` (or `src/shared/lib`)
+  - Purpose: reusable utilities (e.g., lazy-loading images, intersection detection for animations).
+  - Testing: Use `jsdom` helpers or mock the observer.
+
+Testing guidelines for hooks
+
+- Prefer testing pure helpers (like `buildGraphFromData`) directly. These tests are reliable
+  and do not require network mocking.
+- For hooks that perform network I/O, mock the underlying network functions (for example,
+  `getFilmById`, `getStarshipById`, `getPersonById`, or the `useQuery` fetcher) so tests do not
+  perform real requests.
+- Use `vitest` + `@testing-library/react` for hook/component tests. Example:
+
+```ts
+// Example: test buildGraphFromData without network
+import { buildGraphFromData } from './useHeroDetails';
+// assert nodes/edges shape with small mocked data
+```
+
 Configurable request delay
 
 - For rate-limiting or demonstration, the hook currently uses a small delay between
