@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getFilmById } from '../../../entities/film';
 import { getStarshipById } from '../../../entities/starship';
-import { usePersonQuery } from '../../../shared/lib';
+import { usePersonQuery, waitMs } from '../../../shared/lib';
 import { buildGraphFromData } from './buildGraphFromData';
 import type { Film } from '../../../entities/film';
 import type { Person } from '../../../entities/person';
@@ -36,8 +36,13 @@ export const useHeroDetails = (id?: string): UseHeroDetailsResult => {
       setFetchError(null);
 
       try {
-        const filmPromises = person.films.map((fid: number) => getFilmById(fid, signal));
-        const filmsRes = await Promise.all(filmPromises);
+        // Fetch films with delay between each request
+        const filmsRes: Film[] = [];
+        for (const fid of person.films) {
+          const film = await getFilmById(fid, signal);
+          filmsRes.push(film);
+          await waitMs(300);
+        }
         if (signal.aborted) return;
         setFilms(filmsRes);
 
@@ -50,8 +55,13 @@ export const useHeroDetails = (id?: string): UseHeroDetailsResult => {
         }
 
         const starshipIds = Array.from(starshipIdsSet);
-        const starshipPromises = starshipIds.map((sid) => getStarshipById(sid, signal));
-        const starshipsRes = await Promise.all(starshipPromises);
+        // Fetch starships with delay between each request
+        const starshipsRes: Starship[] = [];
+        for (const sid of starshipIds) {
+          const starship = await getStarshipById(sid, signal);
+          starshipsRes.push(starship);
+          await waitMs(300);
+        }
         if (signal.aborted) return;
         setStarships(starshipsRes);
       } catch (err) {

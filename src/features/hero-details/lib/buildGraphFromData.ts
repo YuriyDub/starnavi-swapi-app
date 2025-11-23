@@ -3,12 +3,11 @@ import type { Person } from '../../../entities/person';
 import type { Starship } from '../../../entities/starship';
 import type { Edge, Node } from 'reactflow';
 
-/**
- * buildGraphFromData
- * Pure helper that builds React Flow nodes and edges from the given
- * person, films and starships collections. Extracted to allow unit testing
- * without performing network requests.
- */
+//  buildGraphFromData
+//  Pure helper that builds React Flow nodes and edges from the given
+//  person, films and starships collections. Extracted to allow unit testing
+//  without performing network requests.
+
 export const buildGraphFromData = (
   person: Person | null,
   films: Film[],
