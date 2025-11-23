@@ -1,73 +1,90 @@
-# React + TypeScript + Vite
+# Starnavi SWAPI App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Lightweight React + TypeScript demo app that visualizes a Star Wars person (hero)
+and related entities (films and starships) as an interactive graph using React Flow.
 
-Currently, two official plugins are available:
+This repository is organized using a Feature-Sliced Design (FSD)-like layout:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- `src/entities` — domain entities (person, film, starship) and their UI nodes
+- `src/features` — feature-level orchestration (hero details view, graph)
+- `src/shared` — shared UI, hooks and utilities (e.g., `BaseNode`, `useCardEffect`)
 
-## React Compiler
+Key ideas and goals
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Clean, well-typed TypeScript code with clear naming (no ambiguous abbreviations).
+- Reusable UI building blocks (`BaseNode`) and small pure helpers for testability.
+- Unit tests must not perform real network requests.
+- Simple, maintainable code following SOLID / DRY / KISS principles.
 
-## Expanding the ESLint configuration
+Tech stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- React 19 + TypeScript
+- React Flow for graph rendering
+- TailwindCSS for styling
+- Vitest + @testing-library for unit tests
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Quick start
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+1. Install dependencies
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. Run development server
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+npm run dev
+```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+3. Build for production
+
+```bash
+npm run build
+```
+
+Linting
+
+```bash
+npm run lint
+```
+
+Testing
+
+- Run tests in watch mode:
+
+```bash
+npm run test
+```
+
+- Run tests once (CI-friendly):
+
+```bash
+npm run test:run
+```
+
+Important: Tests must never perform real network requests.
+
+- The repository contains a pure helper `buildGraphFromData(person, films, starships)`
+  (in `src/features/hero-details/lib/useHeroDetails.ts`) that builds React Flow `nodes` and
+  `edges`. Unit tests should import and exercise this helper directly rather than
+  invoking hooks that perform fetching.
+
+Where to look next
+
+- `src/features/hero-details/lib/useHeroDetails.ts` — orchestrates fetching and builds
+  graph nodes/edges. To avoid network calls in tests, use the exported `buildGraphFromData`.
+- `src/features/hero-details/ui/GraphView.tsx` — React Flow wrapper and node registrations.
+- `src/entities/*/ui/*` — node components (HeroNode, FilmNode, StarshipNode) using `BaseNode`.
+- `src/shared/ui/BaseNode.tsx` — shared card wrapper used by nodes.
+
+Configurable request delay
+
+- For rate-limiting or demonstration, the hook currently uses a small delay between
+  individual film and starship requests. The helper `waitMs` (in `useHeroDetails.ts`) is used
+  with a default 300ms delay. To change the delay, edit the `waitMs` usage or extract the
+  delay value into a configuration variable.
+
+```
+
 ```
